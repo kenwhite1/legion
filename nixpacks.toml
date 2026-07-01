@@ -1,0 +1,6 @@
+# Build config for Railway (Nixpacks).
+# Node is pinned to 22 via .nvmrc + package.json engines so better-sqlite3 installs
+# its PREBUILT binary (no compilation, no Python needed). The apt packages below are a
+# belt-and-suspenders fallback: if a prebuilt is ever missing, node-gyp can still build.
+[phases.setup]
+aptPkgs = ["python3", "build-essential"]

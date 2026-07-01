@@ -1,0 +1,11 @@
+node_modules
+dist
+data
+*.sqlite
+*.sqlite-*
+.env
+.DS_Store
+.code-review-graph
+
+# local preview config
+.claude

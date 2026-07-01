@@ -1,0 +1,17 @@
+{
+  "name": "legion",
+  "private": true,
+  "engines": { "node": "22.x" },
+  "workspaces": ["server", "app"],
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:app": "npm run dev -w app",
+    "build": "npm run build -w app",
+    "start": "npm run start -w server",
+    "test": "node --import tsx --test shared/*.test.ts",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w app"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}

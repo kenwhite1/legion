@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken } from './auth'
 import type { Env } from './env'
 import { getOrCreateUser, getProfile, recordResult, topPlayers } from './profiles'
+import { storeLaunchToken, reportMatch } from './gg'
 import { createRoom, joinRoom, quickMatch, startRoom, actInRoom, getRoomState, leaveRoom } from './rooms'
 import { BOT_USERNAME } from './env'
 import type { Action } from '../../shared/engine'
@@ -19,6 +20,8 @@ api.post('/auth', async c => {
   if (!v) return c.json({ error: 'invalid_init_data' }, 401)
   const name = [v.user.first_name, v.user.last_name].filter(Boolean).join(' ').slice(0, 40) || 'Игрок'
   getOrCreateUser(v.user.id, name, v.user.username)
+  // Открыли из хаба GG — в startapp приехал токен запуска, он нужен в конце партии.
+  storeLaunchToken(v.user.id, v.startParam)
   const token = await issueToken(v.user.id)
   return c.json({ token, profile: getProfile(v.user.id), startParam: v.startParam, botUsername: BOT_USERNAME })
 })
@@ -40,9 +43,24 @@ api.get('/leaderboard', c => c.json({ top: topPlayers(20) }))
 // фиксируем завершённую одиночную партию (движок крутится на клиенте, сервер
 // лишь ведёт статистику)
 api.post('/solo/result', async c => {
-  const body = await c.req.json<{ won: boolean; score: number }>().catch(() => null)
+  const body = await c.req.json<{ won: boolean; score: number; runId?: string }>().catch(() => null)
   if (!body) return c.json({ error: 'bad_request' }, 400)
-  const profile = recordResult(c.get('uid'), 'solo', !!body.won, Math.max(0, Math.min(20, body.score | 0)))
+  const score = Math.max(0, Math.min(20, body.score | 0))
+  const profile = recordResult(c.get('uid'), 'solo', !!body.won, score)
+  // Рапорт хабу. runId клиент заводит на старте забега, поэтому ключ уникален
+  // для каждой соло-партии и стабилен при повторе. Без него не рапортуем:
+  // выдуманный на сервере ключ на ретрае доплатил бы второй раз.
+  if (typeof body.runId === 'string' && /^[a-z0-9]{1,32}$/.test(body.runId)) {
+    reportMatch({
+      userId: c.get('uid'),
+      idempotencyKey: `legion-solo-${body.runId}-${c.get('uid')}`,
+      won: !!body.won,
+      humanPlayers: 1,
+      score,
+      mode: 'solo',
+      opponents: [],
+    })
+  }
   return c.json({ profile })
 })
 

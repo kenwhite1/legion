@@ -19,6 +19,8 @@ import { botDecide, type Difficulty } from '../../shared/bots'
 import { toView } from '../../shared/view'
 import type { RoomStateDto, RoomDto } from '../../shared/types'
 import { recordResult } from './profiles'
+import { reportMatch } from './gg'
+import type { MatchMode } from '../../shared/gg'
 
 interface Seat {
   id: string // id игрока движка: 'u<tgid>' для людей, 'bot1'… для ботов
@@ -264,10 +266,31 @@ function finishIfDone(room: Room): void {
   const g = room.game
   const winner = g.players.find(p => p.id === g.winnerId)
   room.roundOver = { winnerName: winner?.name ?? '-' }
+  // Живые — только настоящие люди: в быстрой комнате боты замаскированы под них
+  // для UI, но хабу нужно честное число (соц./ранговые ачивки, анти-чит).
+  const humans = room.seats.filter(h => !h.isBot && h.tgId != null)
+  const mode: MatchMode = room.quick ? 'multi' : 'friends'
   for (const s of room.seats) {
     if (s.isBot || s.tgId == null) continue
     const won = g.winnerId === s.id
-    recordResult(s.tgId, 'online', won, territoryCount(g, s.id))
+    const territories = territoryCount(g, s.id)
+    recordResult(s.tgId, 'online', won, territories)
+    // Рапорт хабу: room.scored выше гарантирует один раз на партию, а ключ
+    // идемпотентности (код + время создания комнаты) — что повтор не доплатит.
+    reportMatch({
+      userId: s.tgId,
+      idempotencyKey: `legion-${room.code}-${room.createdAt}-${s.tgId}`,
+      won,
+      players: room.seats.length,
+      humanPlayers: humans.length,
+      score: territories,
+      mode,
+      opponents: humans.filter(h => h.tgId !== s.tgId).map(h => h.tgId as number),
+      // «Молния»: turnCount растёт на каждый ход игрока, так что порог из
+      // SDK-PER-GAME.md проверяется напрямую. Остальные флаги легиона
+      // («без потерь», «континент») движок не отслеживает — не выдумываем.
+      stats: won && g.turnCount < 25 ? { fast: true } : undefined,
+    })
   }
 }
 

@@ -13,6 +13,7 @@ import type { Profile, RoomStateDto } from '@shared/types'
 import { api } from './api'
 import { haptic } from './telegram'
 import { playSfx } from './sound'
+import { t } from './i18n'
 
 type Screen = 'home' | 'rules' | 'leaderboard' | 'lobby' | 'game'
 
@@ -57,6 +58,11 @@ interface S {
 
 let botTimer: ReturnType<typeof setTimeout> | null = null
 let pollTimer: ReturnType<typeof setInterval> | null = null
+// Идентификатор соло-забега: заводится на старте партии и едет в отчёт хабу,
+// чтобы ключ идемпотентности был стабильным при повторе и разным у разных
+// партий (соло-движок крутится здесь, сервер про забег ничего не знает).
+let soloRunId = ''
+const newRunId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`
 let lastBattleSeq = 0
 let lastYourTurn = false
 
@@ -65,13 +71,14 @@ function stopPoll() { if (pollTimer) clearInterval(pollTimer); pollTimer = null 
 
 export const useStore = create<S>((set, get) => {
   function toast(text: string) {
-    set({ toast: text })
-    setTimeout(() => { if (get().toast === text) set({ toast: null }) }, 1700)
+    const msg = t(text)
+    set({ toast: msg })
+    setTimeout(() => { if (get().toast === msg) set({ toast: null }) }, 1700)
   }
 
   // Реакция на новое состояние (для обоих режимов): всплывающие кубики,
   // звуки и вибрация «твой ход». Событийный поток есть только в соло, поэтому
-  // бой и смену хода ловим по полям вида — так работает и онлайн-опрос.
+  // бой и смену хода ловим по полям вида - так работает и онлайн-опрос.
   function reactToView(v: GameView | null) {
     if (!v) return
     if (v.battleSeq !== lastBattleSeq) {
@@ -92,7 +99,7 @@ export const useStore = create<S>((set, get) => {
     for (const e of events) {
       if (e.kind === 'place') playSfx('place')
       else if (e.kind === 'capture') { /* звук идёт из reactToView */ }
-      else if (e.kind === 'eliminate') toast(`${nameOf(e.playerId)} повержен`)
+      else if (e.kind === 'eliminate') toast(`${t(nameOf(e.playerId))} ${t('повержен')}`)
       else if (e.kind === 'fortify') playSfx('place')
     }
   }
@@ -136,7 +143,7 @@ export const useStore = create<S>((set, get) => {
     playSfx(won ? 'win' : 'lose')
     haptic(won ? 'success' : 'warn')
     set({ result: { won, territories: territoryCount(s, get().youId), winnerName: winner?.name ?? '-' } })
-    api.soloResult(won, territoryCount(s, get().youId)).then(r => set({ profile: r.profile })).catch(() => {})
+    api.soloResult(won, territoryCount(s, get().youId), soloRunId).then(r => set({ profile: r.profile })).catch(() => {})
   }
 
   function soloApply(action: Action) {
@@ -231,6 +238,7 @@ export const useStore = create<S>((set, get) => {
       stopBots(); stopPoll()
       lastBattleSeq = 0; lastYourTurn = false
       const youId = 'you'
+      soloRunId = newRunId()
       const players = [
         { id: youId, name: get().profile?.name ?? 'Ты', isBot: false },
         { id: 'bot1', name: 'Аскольд', isBot: true },
@@ -253,7 +261,7 @@ export const useStore = create<S>((set, get) => {
         set({ mode: 'online', room: st, screen: 'lobby', result: null, battle: null, busy: false })
         startPoll(st.room.code)
       } catch {
-        set({ busy: false, joinError: 'Не удалось подобрать игру. Проверь связь.' })
+        set({ busy: false, joinError: t('Не удалось подобрать игру. Проверь связь.') })
       }
     },
 
@@ -265,7 +273,7 @@ export const useStore = create<S>((set, get) => {
         set({ mode: 'online', room: st, screen: 'lobby', result: null, battle: null, busy: false })
         startPoll(st.room.code)
       } catch {
-        set({ busy: false, joinError: 'Не удалось создать комнату. Проверь связь.' })
+        set({ busy: false, joinError: t('Не удалось создать комнату. Проверь связь.') })
       }
     },
 
@@ -278,7 +286,7 @@ export const useStore = create<S>((set, get) => {
         startPoll(st.room.code)
       } catch (e) {
         const err = (e as { data?: { error?: string } })?.data?.error
-        set({ busy: false, joinError: err === 'no_room' ? 'Нет комнаты с таким кодом.' : err === 'already_started' ? 'Игра уже началась.' : err === 'full' ? 'В комнате нет мест.' : 'Не удалось войти.' })
+        set({ busy: false, joinError: err === 'no_room' ? t('Нет комнаты с таким кодом.') : err === 'already_started' ? t('Игра уже началась.') : err === 'full' ? t('В комнате нет мест.') : t('Не удалось войти.') })
       }
     },
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore } from '../store'
 import { shareLink, haptic } from '../telegram'
 import { APP_NAME } from '../brand'
+import { t } from '../i18n'
 
 export function Lobby() {
   const room = useStore(s => s.room)
@@ -20,12 +21,12 @@ export function Lobby() {
       <div className="lobby rise">
         <div className="page-head" style={{ alignSelf: 'flex-start' }}>
           <button className="round-btn" onClick={() => useStore.getState().go('home')}>‹</button>
-          <h1>Войти по коду</h1>
+          <h1>{t('Войти по коду')}</h1>
         </div>
         <div className="field" style={{ marginTop: 8 }}>
           <input
             className="code-input"
-            placeholder="КОД"
+            placeholder={t('КОД')}
             value={code}
             maxLength={4}
             autoCapitalize="characters"
@@ -38,7 +39,7 @@ export function Lobby() {
             disabled={code.length !== 4 || busy}
             onClick={() => joinRoom(code)}
           >
-            {busy ? 'Входим…' : 'Войти в игру'}
+            {busy ? t('Входим…') : t('Войти в игру')}
           </button>
         </div>
       </div>
@@ -51,19 +52,19 @@ export function Lobby() {
       <div className="lobby rise">
         <div className="page-head" style={{ alignSelf: 'flex-start' }}>
           <button className="round-btn" onClick={leaveGame}>‹</button>
-          <h1>Быстрая игра</h1>
+          <h1>{t('Быстрая игра')}</h1>
         </div>
         <div className="code-card" style={{ textAlign: 'center' }}>
           <div className="searching-bob" style={{ fontSize: 46 }}>⚡</div>
-          <h2 style={{ color: 'var(--ink)', marginTop: 6 }}>Собираем соперников<span className="dots-anim" /></h2>
-          <p style={{ color: 'var(--ink-soft)', fontWeight: 800, marginTop: 6 }}>Партия начнётся через пару секунд</p>
+          <h2 style={{ color: 'var(--ink)', marginTop: 6 }}>{t('Собираем соперников')}<span className="dots-anim" /></h2>
+          <p style={{ color: 'var(--ink-soft)', fontWeight: 800, marginTop: 6 }}>{t('Партия начнётся через пару секунд')}</p>
         </div>
         <div className="seatlist">
           {room.room.players.map(p => (
             <div className="seat" key={p.id}>
               <div className="av">🎖️</div>
-              <div className="nm">{p.name}</div>
-              <div className="tag wait">в строю</div>
+              <div className="nm">{t(p.name)}</div>
+              <div className="tag wait">{t('в строю')}</div>
             </div>
           ))}
         </div>
@@ -79,48 +80,48 @@ export function Lobby() {
   const share = () => {
     haptic('tap')
     const link = `https://t.me/${botUsername}?startapp=room_${room.room.code}`
-    shareLink(link, `Заходи ко мне в ${APP_NAME}! Код комнаты ${room.room.code} ⚔️`)
+    shareLink(link, `${t('Заходи ко мне в')} ${t(APP_NAME)}! ${t('Код комнаты')} ${room.room.code} ⚔️`)
   }
 
   return (
     <div className="lobby rise">
       <div className="page-head" style={{ alignSelf: 'flex-start' }}>
         <button className="round-btn" onClick={leaveGame}>‹</button>
-        <h1>Военный совет</h1>
+        <h1>{t('Военный совет')}</h1>
       </div>
 
       <div className="code-card">
-        <div style={{ fontWeight: 800, color: 'var(--ink-soft)' }}>Поделись кодом</div>
+        <div style={{ fontWeight: 800, color: 'var(--ink-soft)' }}>{t('Поделись кодом')}</div>
         <div className="code-big">{room.room.code}</div>
-        <button className="btn accent block" style={{ marginTop: 8 }} onClick={share}>Позвать друзей ↗</button>
+        <button className="btn accent block" style={{ marginTop: 8 }} onClick={share}>{t('Позвать друзей ↗')}</button>
       </div>
 
       <div className="seatlist">
         {room.room.players.map(p => (
           <div className="seat" key={p.id}>
             <div className="av">{p.isBot ? '🤖' : '🎖️'}</div>
-            <div className="nm">{p.name}</div>
-            {p.isHost ? <div className="tag host">ХОЗЯИН</div> : p.isBot ? <div className="tag bot">БОТ</div> : <div className="tag wait">готов</div>}
+            <div className="nm">{t(p.name)}</div>
+            {p.isHost ? <div className="tag host">{t('ХОЗЯИН')}</div> : p.isBot ? <div className="tag bot">{t('БОТ')}</div> : <div className="tag wait">{t('готов')}</div>}
           </div>
         ))}
         {humans.length < room.room.maxPlayers && (
           <div className="seat" style={{ opacity: 0.6 }}>
             <div className="av">＋</div>
-            <div className="nm" style={{ fontWeight: 800 }}>Ждём игроков…</div>
+            <div className="nm" style={{ fontWeight: 800 }}>{t('Ждём игроков…')}</div>
           </div>
         )}
       </div>
 
       <p className="hintline" style={{ marginTop: 16 }}>
-        Пустые места займут боты, когда начнёшь.
+        {t('Пустые места займут боты, когда начнёшь.')}
       </p>
 
       {isHost ? (
         <button className="btn block lg" style={{ maxWidth: 420, marginTop: 8 }} disabled={busy} onClick={startRoom}>
-          {busy ? 'Строим войска…' : 'Начать битву ⚔️'}
+          {busy ? t('Строим войска…') : t('Начать битву ⚔️')}
         </button>
       ) : (
-        <p className="hintline" style={{ marginTop: 8 }}>Ждём, пока хозяин начнёт…</p>
+        <p className="hintline" style={{ marginTop: 8 }}>{t('Ждём, пока хозяин начнёт…')}</p>
       )}
     </div>
   )

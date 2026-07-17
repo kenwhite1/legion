@@ -29,7 +29,7 @@ export function botDecide(s: GameState, botId: string, difficulty: Difficulty = 
   return fortifyMove(s, botId, difficulty)
 }
 
-// стабильный псевдослучай в [0,1) из состояния — одна и та же позиция решает
+// стабильный псевдослучай в [0,1) из состояния - одна и та же позиция решает
 // одинаково (без Math.random в общем коде)
 function jitter(s: GameState): number {
   let sum = 0
@@ -61,7 +61,7 @@ function strongestEnemyPressure(s: GameState, id: string): number {
 // --- ввод войск после захвата ------------------------------------------------
 function advanceMove(s: GameState, botId: string): Action {
   const pa = s.pendingAdvance!
-  // Если исходная земля осталась на передовой — оставим там немного обороны.
+  // Если исходная земля осталась на передовой - оставим там немного обороны.
   const exposed = attackTargets(s, pa.from).length > 0
   let count = exposed ? Math.max(pa.min, Math.floor(pa.max / 2)) : pa.max
   count = Math.min(pa.max, Math.max(pa.min, count))
@@ -74,7 +74,7 @@ function reinforceMove(s: GameState, botId: string, diff: Difficulty): Action {
   const pool = front.length ? front : territoriesOf(s, botId)
 
   if (diff === 'easy') {
-    // Копит всё на одной случайной передовой — концентрирует силу, но выбирает
+    // Копит всё на одной случайной передовой - концентрирует силу, но выбирает
     // точку удара наугад (оттого и слабее опытного соперника).
     const idx = Math.min(Math.floor(jitter(s) * pool.length), pool.length - 1)
     return { type: 'place', playerId: botId, territoryId: pool[idx], count: s.reinforcements }
@@ -87,7 +87,7 @@ function reinforceMove(s: GameState, botId: string, diff: Difficulty): Action {
     const weakest = weakestEnemyNeighbour(s, id)
     const margin = (armies(s, id) + s.reinforcements - 1) - (isFinite(weakest) ? weakest : 0)
     const pressure = strongestEnemyPressure(s, id)
-    // hard мыслит наступательно (маржа пробоя), medium — балансирует с обороной.
+    // hard мыслит наступательно (маржа пробоя), medium - балансирует с обороной.
     const score = diff === 'hard' ? margin + pressure * 0.2 : margin * 0.6 + pressure * 0.5
     if (score > bestScore) { bestScore = score; best = id }
   }
@@ -105,7 +105,7 @@ function attackMove(s: GameState, botId: string, diff: Difficulty): Action {
     for (const to of attackTargets(s, from)) {
       const def = armies(s, to)
       let score = power - def // перевес атакующего
-      // Добить игрока, у которого это последняя земля, — приоритет.
+      // Добить игрока, у которого это последняя земля, - приоритет.
       const owner = s.tiles[to].owner
       const ownerLands = territoriesOf(s, owner).length
       if (ownerLands === 1) score += 3
@@ -116,7 +116,7 @@ function attackMove(s: GameState, botId: string, diff: Difficulty): Action {
 
   // Порог перевеса, при котором бот идёт в атаку.
   const threshold = diff === 'hard' ? 0 : diff === 'medium' ? 1 : 2
-  // easy иногда робеет — но при явном перевесе всё же давит, чтобы добивать.
+  // easy иногда робеет - но при явном перевесе всё же давит, чтобы добивать.
   const timid = diff === 'easy' && best.score < 4 && jitter(s) < 0.3
   if (best.score >= threshold && !timid) {
     return { type: 'attack', playerId: botId, from: best.from, to: best.to }
@@ -133,7 +133,7 @@ function fortifyMove(s: GameState, botId: string, diff: Difficulty): Action {
   const owned = territoriesOf(s, botId).slice().sort((a, b) => armies(s, b) - armies(s, a))
   for (const from of owned) {
     if (armies(s, from) < 2) continue
-    if (attackTargets(s, from).length > 0) continue // это передовая — не оголяем
+    if (attackTargets(s, from).length > 0) continue // это передовая - не оголяем
     const fronts = fortifyTargets(s, from).filter(t => attackTargets(s, t).length > 0)
     if (fronts.length === 0) continue
     const to = fronts.reduce((a, b) => (strongestEnemyPressure(s, b) > strongestEnemyPressure(s, a) ? b : a))
@@ -147,5 +147,5 @@ export function hasAnyAttack(s: GameState, playerId: string): boolean {
   return attackSources(s, playerId).length > 0
 }
 
-// прямое соседство — реэкспорт для удобства клиента
+// прямое соседство - реэкспорт для удобства клиента
 export { areAdjacent }

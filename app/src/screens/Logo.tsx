@@ -1,7 +1,9 @@
 // Знак «Легион»: щит с картой из гексов и флагом-штандартом наверху.
+import { t } from '../i18n'
+
 export function Logo({ size = 132 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 160 160" className="brand-logo" aria-label="Легион">
+    <svg width={size} height={size} viewBox="0 0 160 160" className="brand-logo" aria-label={t('Легион')}>
       <defs>
         <linearGradient id="lg-shield" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#fffaf0" />

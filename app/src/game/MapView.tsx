@@ -7,6 +7,7 @@ import {
   hexCorners,
 } from '@shared/map'
 import { playerColor } from '../brand'
+import { t } from '../i18n'
 import type { GameView } from '@shared/view'
 
 const SIZE = 34
@@ -63,21 +64,21 @@ export function MapView({ view, sel, targets, onTap, flash }: Props) {
         })}
       </g>
 
-      {TERRITORIES.map(t => {
-        const c = LAYOUT.centers[t.id]
-        const tile = view.tiles[t.id]
+      {TERRITORIES.map(terr => {
+        const c = LAYOUT.centers[terr.id]
+        const tile = view.tiles[terr.id]
         const col = playerColor(colorOf[tile.owner] ?? 0)
-        const region = REGIONS[REGION_BY_ID[t.id]]
-        const isSel = sel === t.id
-        const isTgt = targets.has(t.id)
+        const region = REGIONS[REGION_BY_ID[terr.id]]
+        const isSel = sel === terr.id
+        const isTgt = targets.has(terr.id)
         const rimStroke = isSel ? '#f2a93b' : isTgt ? '#d1495b' : region.tintDeep
         const rimWidth = isSel ? 3.6 : isTgt ? 3 : 1.5
-        const cls = 'terr' + (isSel ? ' terr-sel' : isTgt ? ' terr-tgt' : '') + (flash === t.id ? ' terr-flash' : '')
+        const cls = 'terr' + (isSel ? ' terr-sel' : isTgt ? ' terr-tgt' : '') + (flash === terr.id ? ' terr-flash' : '')
         return (
           <g
-            key={t.id}
+            key={terr.id}
             transform={`translate(${c.x} ${c.y})`}
-            onClick={() => onTap(t.id)}
+            onClick={() => onTap(terr.id)}
             style={{ cursor: 'pointer' }}
             className={cls}
           >
@@ -91,7 +92,7 @@ export function MapView({ view, sel, targets, onTap, flash }: Props) {
             <polygon points={hexCorners(0, 0, SIZE * 0.86)} fill="none" stroke={rimStroke} strokeWidth={rimWidth}
               strokeDasharray={isTgt && !isSel ? '5 4' : undefined} />
             {/* название */}
-            <text className="terr-label" y={-SIZE * 0.5}>{t.name}</text>
+            <text className="terr-label" y={-SIZE * 0.5}>{t(terr.name)}</text>
             {/* значок армий */}
             <circle cx="0" cy={SIZE * 0.12} r="11.5" fill={col.deep} stroke="rgba(255,255,255,.85)" strokeWidth="1.6" />
             <text className="army-num" x="0" y={SIZE * 0.12} fontSize="13" fill={col.ink}>{tile.armies}</text>
@@ -101,7 +102,7 @@ export function MapView({ view, sel, targets, onTap, flash }: Props) {
 
       {/* подписи регионов поверх карты, как выцветшие названия континентов */}
       {LAYOUT.regionCentroid.map((r, i) => (
-        <text key={i} className="region-label" x={r.x} y={r.y - SIZE * 0.02}>{r.name}</text>
+        <text key={i} className="region-label" x={r.x} y={r.y - SIZE * 0.02}>{t(r.name)}</text>
       ))}
     </svg>
   )

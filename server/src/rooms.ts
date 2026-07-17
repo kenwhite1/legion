@@ -4,8 +4,8 @@
 // слой «играй с друзьями», ради которого это настоящее мини-приложение.
 //
 // Два вида комнат:
-//   * дружеские  — по коду; пустые места занимают (видимые) боты, старт по кнопке хозяина;
-//   * быстрые    — публичный подбор; автостарт и добор ботами, которых клиенту
+//   * дружеские  - по коду; пустые места занимают (видимые) боты, старт по кнопке хозяина;
+//   * быстрые    - публичный подбор; автостарт и добор ботами, которых клиенту
 //                  показывают как обычных игроков.
 
 import {
@@ -77,8 +77,8 @@ function pickQuickDiff(): Difficulty {
   return r < 0.25 ? 'easy' : r < 0.8 ? 'medium' : 'hard'
 }
 
-// Добираем стол ботами. В быстрых комнатах — человеческие имена и разная
-// сложность, чтобы соперники читались как живые; в дружеских — по выбору хозяина.
+// Добираем стол ботами. В быстрых комнатах - человеческие имена и разная
+// сложность, чтобы соперники читались как живые; в дружеских - по выбору хозяина.
 function fillBots(room: Room): void {
   const used = new Set(room.seats.map(s => s.name))
   const pool = room.quick ? HUMAN_NAMES : BOT_NAMES
@@ -174,7 +174,7 @@ export function joinRoom(code: string, tgId: number, name: string): RoomStateDto
 }
 
 // Публичный подбор: подсаживаем в открытую быструю комнату или заводим свежую,
-// которая автостартует после короткого окна (добор — замаскированные боты).
+// которая автостартует после короткого окна (добор - замаскированные боты).
 export function quickMatch(tgId: number, name: string): RoomStateDto {
   for (const room of rooms.values()) {
     if (!room.quick || room.game) continue
@@ -244,7 +244,7 @@ export function actInRoom(
 }
 
 // Прокручиваем все подряд идущие ходы ботов (включая обязательный ввод войск
-// после захвата — botDecide сам возвращает нужное действие) до хода человека
+// после захвата - botDecide сам возвращает нужное действие) до хода человека
 // или конца партии.
 function runBots(room: Room): void {
   let guard = 0
@@ -266,7 +266,7 @@ function finishIfDone(room: Room): void {
   const g = room.game
   const winner = g.players.find(p => p.id === g.winnerId)
   room.roundOver = { winnerName: winner?.name ?? '-' }
-  // Живые — только настоящие люди: в быстрой комнате боты замаскированы под них
+  // Живые - только настоящие люди: в быстрой комнате боты замаскированы под них
   // для UI, но хабу нужно честное число (соц./ранговые ачивки, анти-чит).
   const humans = room.seats.filter(h => !h.isBot && h.tgId != null)
   const mode: MatchMode = room.quick ? 'multi' : 'friends'
@@ -276,7 +276,7 @@ function finishIfDone(room: Room): void {
     const territories = territoryCount(g, s.id)
     recordResult(s.tgId, 'online', won, territories)
     // Рапорт хабу: room.scored выше гарантирует один раз на партию, а ключ
-    // идемпотентности (код + время создания комнаты) — что повтор не доплатит.
+    // идемпотентности (код + время создания комнаты) - что повтор не доплатит.
     reportMatch({
       userId: s.tgId,
       idempotencyKey: `legion-${room.code}-${room.createdAt}-${s.tgId}`,
@@ -288,7 +288,7 @@ function finishIfDone(room: Room): void {
       opponents: humans.filter(h => h.tgId !== s.tgId).map(h => h.tgId as number),
       // «Молния»: turnCount растёт на каждый ход игрока, так что порог из
       // SDK-PER-GAME.md проверяется напрямую. Остальные флаги легиона
-      // («без потерь», «континент») движок не отслеживает — не выдумываем.
+      // («без потерь», «континент») движок не отслеживает - не выдумываем.
       stats: won && g.turnCount < 25 ? { fast: true } : undefined,
     })
   }
@@ -317,7 +317,7 @@ export function leaveRoom(code: string, tgId: number): void {
 function stateFor(room: Room, tgId: number): RoomStateDto {
   const seat = seatFor(room, tgId)
   let view = room.game && seat ? toView(room.game, seat.id) : null
-  // в быстрой комнате не раскрываем, что соперники — боты
+  // в быстрой комнате не раскрываем, что соперники - боты
   if (view && room.quick) view = { ...view, players: view.players.map(p => ({ ...p, isBot: false })) }
   const won = room.roundOver && seat ? room.game?.winnerId === seat.id : undefined
   return {
@@ -328,7 +328,7 @@ function stateFor(room: Room, tgId: number): RoomStateDto {
   }
 }
 
-// подметаем простаивающие комнаты каждые 10 минут (30 минут без активности — удаляем)
+// подметаем простаивающие комнаты каждые 10 минут (30 минут без активности - удаляем)
 setInterval(() => {
   const now = Date.now()
   for (const [code, room] of rooms) {

@@ -1,11 +1,11 @@
 // --- Движок «Легион» ---------------------------------------------------------
 // Чистая, детерминированная машина состояний для стратегии захвата территорий
-// в духе классических варгеймов (свой мир, свои правила — без чужих карт).
+// в духе классических варгеймов (свой мир, свои правила - без чужих карт).
 //
 // Ход состоит из трёх фаз:
-//   1. Подкрепление — расставь новые армии на свои земли.
-//   2. Наступление  — атакуй соседние вражеские земли (бой на кубиках).
-//   3. Манёвр       — перебрось армии между своими землями и закончи ход.
+//   1. Подкрепление - расставь новые армии на свои земли.
+//   2. Наступление  - атакуй соседние вражеские земли (бой на кубиках).
+//   3. Манёвр       - перебрось армии между своими землями и закончи ход.
 //
 // Всё случайное идёт через засеянный RNG в состоянии, поэтому онлайн-партия на
 // сервере и мгновенная игра на клиенте воспроизводятся одинаково, а тесты
@@ -176,7 +176,7 @@ export function createGame(opts: CreateOptions): GameState {
   }))
   const n = players.length
 
-  // Раздаём территории по кругу в перемешанном порядке — честно и поровну.
+  // Раздаём территории по кругу в перемешанном порядке - честно и поровну.
   const order = TERRITORY_IDS.slice()
   for (let i = order.length - 1; i > 0; i--) {
     const j = Math.floor(rng.next() * (i + 1))
@@ -310,7 +310,7 @@ function doAttack(state: GameState, a: Extract<Action, { type: 'attack' }>): App
   let defenderLoss = 0
   const pairs = Math.min(aDiceN, dDiceN)
   for (let i = 0; i < pairs; i++) {
-    // Ничья — в пользу защитника (классическое правило).
+    // Ничья - в пользу защитника (классическое правило).
     if (attackerDice[i] > defenderDice[i]) defenderLoss++
     else attackerLoss++
   }
@@ -334,12 +334,12 @@ function doAttack(state: GameState, a: Extract<Action, { type: 'attack' }>): App
     events.push({ kind: 'capture', territoryId: a.to, by: a.playerId })
     pushLog(s, `${name(s, a.playerId)} захватывает ${TERRITORY_BY_ID[a.to].name}`)
 
-    // Обязательный ввод войск: минимум — число атакующих кубиков.
+    // Обязательный ввод войск: минимум - число атакующих кубиков.
     const avail = s.tiles[a.from].armies - 1
     const min = Math.min(aDiceN, avail)
     const max = avail
     if (min >= max) {
-      // Двигать нечего или ровно столько — переносим сразу, без вопроса.
+      // Двигать нечего или ровно столько - переносим сразу, без вопроса.
       s.tiles[a.from].armies -= max
       s.tiles[a.to].armies += max
     } else {
@@ -444,7 +444,7 @@ function checkWin(s: GameState): GameEvent | null {
   return null
 }
 
-// Итог по числу земель (и армий как тай-брейк) — на случай упора в лимит ходов.
+// Итог по числу земель (и армий как тай-брейк) - на случай упора в лимит ходов.
 function totalArmies(s: GameState, playerId: string): number {
   let n = 0
   for (const id of TERRITORY_IDS) if (s.tiles[id].owner === playerId) n += s.tiles[id].armies

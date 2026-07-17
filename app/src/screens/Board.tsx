@@ -6,6 +6,7 @@ import { toView, type GameView } from '@shared/view'
 import type { Action } from '@shared/engine'
 import { playerColor } from '../brand'
 import { haptic } from '../telegram'
+import { t } from '../i18n'
 
 const PHASES = [
   { key: 'reinforce', label: 'Подкрепление', ic: '🛡️' },
@@ -64,7 +65,7 @@ export function Board() {
 
   if (!view) {
     return <div className="board" style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
-      <div className="turn-chip">Готовим карту<span className="dots-anim" /></div>
+      <div className="turn-chip">{t('Готовим карту')}<span className="dots-anim" /></div>
     </div>
   }
 
@@ -94,11 +95,11 @@ export function Board() {
   return (
     <div className="board">
       <div className="board-top">
-        <button className="round-btn" onClick={leaveGame} aria-label="Выйти">‹</button>
+        <button className="round-btn" onClick={leaveGame} aria-label={t('Выйти')}>‹</button>
         <div className="grow" style={{ display: 'flex', justifyContent: 'center' }}>
           <div className={`turn-chip${myTurn ? ' you' : ''}`}>
             <span className="turn-dot" style={{ background: playerColor(cur.color).base }} />
-            {myTurn ? 'Твой ход' : `Ходит ${cur.name}`}
+            {myTurn ? t('Твой ход') : `${t('Ходит')} ${cur.name}`}
           </div>
         </div>
         <div style={{ width: 46 }} />
@@ -108,7 +109,7 @@ export function Board() {
         {view.players.map((p, i) => (
           <div key={p.id} className={`leg${view.turn === i && p.alive ? ' active' : ''}${!p.alive ? ' dead' : ''}`}>
             <span className="leg-dot" style={{ background: playerColor(p.color).base }} />
-            <span className="n">{p.id === me ? 'Ты' : p.name}</span>
+            <span className="n">{p.id === me ? t('Ты') : t(p.name)}</span>
             {p.alive
               ? <span className="c">{p.territories}🚩<span className="a">{p.armies}⚔</span></span>
               : <span className="c">✕</span>}
@@ -131,7 +132,7 @@ export function Board() {
         {PHASES.map((p, i) => (
           <div key={p.key} className={`phase-step${p.key === phase ? ' on' : ''}${i < phaseIdx ? ' done' : ''}`}>
             <span className="ic">{p.ic}</span>
-            <span>{p.label}</span>
+            <span>{t(p.label)}</span>
           </div>
         ))}
       </div>
@@ -142,12 +143,12 @@ export function Board() {
           <div className="act-row">
             {phase === 'attack' && (
               <>
-                <button className="btn cream" onClick={() => send({ type: 'endAttack', playerId: me })}>К манёвру 🏇</button>
-                <button className="btn accent" onClick={() => send({ type: 'endTurn', playerId: me })}>Завершить ход</button>
+                <button className="btn cream" onClick={() => send({ type: 'endAttack', playerId: me })}>{t('К манёвру 🏇')}</button>
+                <button className="btn accent" onClick={() => send({ type: 'endTurn', playerId: me })}>{t('Завершить ход')}</button>
               </>
             )}
             {phase === 'fortify' && (
-              <button className="btn accent block" onClick={() => send({ type: 'endTurn', playerId: me })}>Завершить ход ✓</button>
+              <button className="btn accent block" onClick={() => send({ type: 'endTurn', playerId: me })}>{t('Завершить ход ✓')}</button>
             )}
           </div>
         )}
@@ -169,11 +170,11 @@ export function Board() {
   )
 
   function hint() {
-    if (!myTurn) return <>Ходит <b>{cur.name}</b><span className="dots-anim" /></>
-    if (pending) return <>Введи войска на захваченную землю</>
-    if (phase === 'reinforce') return <>Расставь подкрепления на свои земли<span className="reinf-badge">{view!.reinforcements}</span></>
-    if (phase === 'attack') return sel ? <>Выбери <span className="big">цель</span> для атаки</> : <>Выбери землю, <span className="big">откуда</span> напасть</>
-    return sel ? <>Выбери, <span className="big">куда</span> перебросить войска</> : <>Перебрось войска на границу (по желанию)</>
+    if (!myTurn) return <>{t('Ходит')} <b>{t(cur.name)}</b><span className="dots-anim" /></>
+    if (pending) return <>{t('Введи войска на захваченную землю')}</>
+    if (phase === 'reinforce') return <>{t('Расставь подкрепления на свои земли')}<span className="reinf-badge">{view!.reinforcements}</span></>
+    if (phase === 'attack') return sel ? <>{t('Выбери')} <span className="big">{t('цель')}</span> {t('для атаки')}</> : <>{t('Выбери землю,')} <span className="big">{t('откуда')}</span> {t('напасть')}</>
+    return sel ? <>{t('Выбери,')} <span className="big">{t('куда')}</span> {t('перебросить войска')}</> : <>{t('Перебрось войска на границу (по желанию)')}</>
   }
 }
 
@@ -186,9 +187,9 @@ function AdvanceSheet({ view, send }: { view: GameView; send: (a: Action) => voi
     <div className="scrim center">
       <div className="sheet pop" style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 44 }}>🚩</div>
-        <h2 style={{ marginTop: 4 }}>Земля захвачена!</h2>
+        <h2 style={{ marginTop: 4 }}>{t('Земля захвачена!')}</h2>
         <p style={{ color: 'var(--ink-soft)', fontWeight: 800, margin: '6px 0 4px' }}>
-          Сколько войск ввести на новую землю? Минимум {pa.min}.
+          {t('Сколько войск ввести на новую землю? Минимум')} {pa.min}.
         </p>
         <div className="advance-row">
           <button className="stepper" onClick={() => setCount(c => Math.max(pa.min, c - 1))}>−</button>
@@ -197,7 +198,7 @@ function AdvanceSheet({ view, send }: { view: GameView; send: (a: Action) => voi
         </div>
         <input className="slider" type="range" min={pa.min} max={pa.max} value={count} onChange={e => setCount(Number(e.target.value))} />
         <button className="btn accent block lg" style={{ marginTop: 14 }} onClick={() => send({ type: 'advance', playerId: view.youId, count })}>
-          Ввести {count} ⚔️
+          {t('Ввести')} {count} ⚔️
         </button>
       </div>
     </div>
@@ -210,16 +211,16 @@ function FortifySheet({ from, max, onCancel, onConfirm }: { from: string; max: n
     <div className="scrim center" onClick={onCancel}>
       <div className="sheet pop" style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
         <div style={{ fontSize: 44 }}>🏇</div>
-        <h2 style={{ marginTop: 4 }}>Перебросить войска</h2>
-        <p style={{ color: 'var(--ink-soft)', fontWeight: 800, margin: '6px 0 4px' }}>После манёвра ход завершится.</p>
+        <h2 style={{ marginTop: 4 }}>{t('Перебросить войска')}</h2>
+        <p style={{ color: 'var(--ink-soft)', fontWeight: 800, margin: '6px 0 4px' }}>{t('После манёвра ход завершится.')}</p>
         <div className="advance-row">
           <button className="stepper" onClick={() => setCount(c => Math.max(1, c - 1))}>−</button>
           <div className="advance-count">{count}</div>
           <button className="stepper" onClick={() => setCount(c => Math.min(max, c + 1))}>+</button>
         </div>
         <input className="slider" type="range" min={1} max={max} value={count} onChange={e => setCount(Number(e.target.value))} />
-        <button className="btn accent block lg" style={{ marginTop: 14 }} onClick={() => onConfirm(count)}>Перебросить {count} и завершить</button>
-        <button className="btn ghost block" style={{ marginTop: 10 }} onClick={onCancel}>Отмена</button>
+        <button className="btn accent block lg" style={{ marginTop: 14 }} onClick={() => onConfirm(count)}>{t('Перебросить')} {count} {t('и завершить')}</button>
+        <button className="btn ghost block" style={{ marginTop: 10 }} onClick={onCancel}>{t('Отмена')}</button>
       </div>
     </div>
   )

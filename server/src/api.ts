@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken } from './auth'
 import type { Env } from './env'
 import { getOrCreateUser, getProfile, recordResult, topPlayers } from './profiles'
-import { storeLaunchToken, reportMatch } from './gg'
+import { storeLaunchToken, reportMatch, withHubCoins } from './gg'
 import { createRoom, joinRoom, quickMatch, startRoom, actInRoom, getRoomState, leaveRoom } from './rooms'
 import { BOT_USERNAME } from './env'
 import type { Action } from '../../shared/engine'
@@ -20,10 +20,11 @@ api.post('/auth', async c => {
   if (!v) return c.json({ error: 'invalid_init_data' }, 401)
   const name = [v.user.first_name, v.user.last_name].filter(Boolean).join(' ').slice(0, 40) || 'Игрок'
   getOrCreateUser(v.user.id, name, v.user.username)
-  // Открыли из хаба GG — в startapp приехал токен запуска, он нужен в конце партии.
+  // Открыли из хаба GG - в startapp приехал токен запуска, он нужен в конце партии.
   storeLaunchToken(v.user.id, v.startParam)
   const token = await issueToken(v.user.id)
-  return c.json({ token, profile: getProfile(v.user.id), startParam: v.startParam, botUsername: BOT_USERNAME })
+  const profile = await withHubCoins(v.user.id, getProfile(v.user.id))
+  return c.json({ token, profile, startParam: v.startParam, botUsername: BOT_USERNAME })
 })
 
 // защита авторизацией для всего ниже
@@ -36,7 +37,7 @@ api.use('/*', async (c, next) => {
   return next()
 })
 
-api.get('/profile', c => c.json({ profile: getProfile(c.get('uid')) }))
+api.get('/profile', async c => c.json({ profile: await withHubCoins(c.get('uid'), getProfile(c.get('uid'))) }))
 
 api.get('/leaderboard', c => c.json({ top: topPlayers(20) }))
 

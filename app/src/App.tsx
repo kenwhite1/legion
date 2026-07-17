@@ -7,16 +7,18 @@ import { Rules } from './screens/Rules'
 import { Leaderboard } from './screens/Leaderboard'
 import { Logo } from './screens/Logo'
 import { APP_NAME } from './brand'
+import { t, useLang } from './i18n'
 import type { Difficulty } from '@shared/bots'
 
 const CONFETTI = ['#d1495b', '#3a86c8', '#4c9a6a', '#e0a33a', '#8a63c4']
-const DIFFS: { d: Difficulty; t: string; s: string; emoji: string }[] = [
-  { d: 'easy', t: 'Легко', s: 'Осторожные соперники', emoji: '🌱' },
-  { d: 'medium', t: 'Средне', s: 'Достойные полководцы', emoji: '🎯' },
-  { d: 'hard', t: 'Сложно', s: 'Безжалостные стратеги', emoji: '🔥' },
+const DIFFS: { d: Difficulty; label: string; sub: string; emoji: string }[] = [
+  { d: 'easy', label: 'Легко', sub: 'Осторожные соперники', emoji: '🌱' },
+  { d: 'medium', label: 'Средне', sub: 'Достойные полководцы', emoji: '🎯' },
+  { d: 'hard', label: 'Сложно', sub: 'Безжалостные стратеги', emoji: '🔥' },
 ]
 
 export function App() {
+  useLang()
   const ready = useStore(s => s.ready)
   const screen = useStore(s => s.screen)
   const init = useStore(s => s.init)
@@ -30,7 +32,7 @@ export function App() {
           <div className="brand" style={{ animation: 'pop-in .5s ease both' }}>
             <Logo />
             <div className="brand-name">{APP_NAME}</div>
-            <div className="brand-tag">Разворачиваем карту…</div>
+            <div className="brand-tag">{t('Разворачиваем карту…')}</div>
           </div>
         </div>
       </div>
@@ -69,15 +71,15 @@ function Overlays() {
           <div className="sheet pop" onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 44, textAlign: 'center' }}>{pick === 'friend' ? '🤝' : '⚔️'}</div>
             <h2 style={{ textAlign: 'center', marginTop: 2 }}>
-              {pick === 'friend' ? 'Сложность ботов' : 'Выбери сложность'}
+              {pick === 'friend' ? t('Сложность ботов') : t('Выбери сложность')}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 16 }}>
-              {DIFFS.map(({ d, t, s, emoji }) => (
+              {DIFFS.map(({ d, label, sub, emoji }) => (
                 <button key={d} className="tile" onClick={() => choose(d)}>
                   <span className="tile-emoji">{emoji}</span>
                   <span className="tile-text">
-                    <span className="tile-title">{t}</span>
-                    <span className="tile-sub">{s}</span>
+                    <span className="tile-title">{t(label)}</span>
+                    <span className="tile-sub">{t(sub)}</span>
                   </span>
                   <span className="tile-chev">›</span>
                 </button>
@@ -110,15 +112,15 @@ function DicePopup() {
     <div className="dice-scrim" />
     <div className="dicepop">
       <div className="dice-side">
-        <span className="lbl">Атака</span>
+        <span className="lbl">{t('Атака')}</span>
         {battle.attackerDice.map((d, i) => <span key={i} className={`die att${attLose[i] ? ' lose' : ''}`}>{d}</span>)}
       </div>
       <div className="dice-side">
-        <span className="lbl">Оборона</span>
+        <span className="lbl">{t('Оборона')}</span>
         {battle.defenderDice.map((d, i) => <span key={i} className={`die def${defLose[i] ? ' lose' : ''}`}>{d}</span>)}
       </div>
       <div className="dice-verdict">
-        {battle.captured ? '🚩 Земля взята!' : `−${battle.attackerLoss} / −${battle.defenderLoss}`}
+        {battle.captured ? t('🚩 Земля взята!') : `−${battle.attackerLoss} / −${battle.defenderLoss}`}
       </div>
     </div>
    </>
@@ -150,14 +152,14 @@ function ResultModal() {
       )}
       <div className="sheet pop result">
         <div className="result-emoji">{won ? '👑' : '🏳️'}</div>
-        <h1>{won ? 'Победа!' : `Победил ${result.winnerName}`}</h1>
-        <div className="result-sub">{won ? 'Ты подчинил всю карту.' : 'В следующий раз повезёт больше!'}</div>
+        <h1>{won ? t('Победа!') : `${t('Победил')} ${t(result.winnerName)}`}</h1>
+        <div className="result-sub">{won ? t('Ты подчинил всю карту.') : t('В следующий раз повезёт больше!')}</div>
         {won && (
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <span className="coin-chip">🪙 +{25 + result.territories} монет</span>
+            <span className="coin-chip">🪙 +{25 + result.territories} {t('монет')}</span>
           </div>
         )}
-        <button className="btn block lg" onClick={leaveGame}>В меню</button>
+        <button className="btn block lg" onClick={leaveGame}>{t('В меню')}</button>
       </div>
     </div>
   )

@@ -11,10 +11,10 @@ import { t, useLang } from './i18n'
 import type { Difficulty } from '@shared/bots'
 
 const CONFETTI = ['#d1495b', '#3a86c8', '#4c9a6a', '#e0a33a', '#8a63c4']
-const DIFFS: { d: Difficulty; label: string; sub: string; emoji: string }[] = [
-  { d: 'easy', label: 'Легко', sub: 'Осторожные соперники', emoji: '🌱' },
-  { d: 'medium', label: 'Средне', sub: 'Достойные полководцы', emoji: '🎯' },
-  { d: 'hard', label: 'Сложно', sub: 'Безжалостные стратеги', emoji: '🔥' },
+const DIFFS = (): { d: Difficulty; label: string; sub: string; emoji: string }[] => [
+  { d: 'easy', label: t('Легко'), sub: t('Осторожные соперники'), emoji: '🌱' },
+  { d: 'medium', label: t('Средне'), sub: t('Достойные полководцы'), emoji: '🎯' },
+  { d: 'hard', label: t('Сложно'), sub: t('Безжалостные стратеги'), emoji: '🔥' },
 ]
 
 export function App() {
@@ -31,7 +31,7 @@ export function App() {
         <div className="home" style={{ justifyContent: 'center' }}>
           <div className="brand" style={{ animation: 'pop-in .5s ease both' }}>
             <Logo />
-            <div className="brand-name">{APP_NAME}</div>
+            <div className="brand-name">{t(APP_NAME)}</div>
             <div className="brand-tag">{t('Разворачиваем карту…')}</div>
           </div>
         </div>
@@ -74,7 +74,7 @@ function Overlays() {
               {pick === 'friend' ? t('Сложность ботов') : t('Выбери сложность')}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 16 }}>
-              {DIFFS.map(({ d, label, sub, emoji }) => (
+              {DIFFS().map(({ d, label, sub, emoji }) => (
                 <button key={d} className="tile" onClick={() => choose(d)}>
                   <span className="tile-emoji">{emoji}</span>
                   <span className="tile-text">

@@ -78,3 +78,57 @@ export async function withHubCoins(userId: number, profile: Profile | null): Pro
   const coins = await hubCoins(userId)
   return coins == null ? profile : { ...profile, coins }
 }
+
+/** Язык хаба для игрока: клейм `lng` из сохранённого токена запуска.
+ *  Нужен серверу, чтобы подобрать соперникам имена на языке игрока. */
+export function userLang(userId: number | null | undefined): 'ru' | 'en' {
+  if (userId == null) return 'ru'
+  const token = launchTokenOf(userId)
+  if (!token) return 'ru'
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'),
+    )
+    return payload.lng === 'en' ? 'en' : 'ru'
+  } catch {
+    return 'ru'
+  }
+}
+
+// ─── Друзья из хаба (§экосистема) ───────────────────────────────────────────
+// Друзей заводят один раз в хабе, а зовут из любой игры. Хаб отдаёт список и
+// сам рассылает приглашения на языке получателя, поэтому игре не нужны ни свой
+// граф друзей, ни свой бот. Ходим через сервер: токен запуска лежит здесь, а на
+// хабе нет CORS для браузера.
+
+export interface HubPerson { id: number; name: string; color: string; face: string }
+
+async function hubCall(path: string, token: string, body?: unknown): Promise<any | null> {
+  try {
+    const res = await fetch(`${HUB_URL}${path}`, {
+      method: body ? 'POST' : 'GET',
+      headers: { 'content-type': 'application/json', 'x-gg-launch': token },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+    const json = await res.json().catch(() => null)
+    return res.ok ? json : null
+  } catch {
+    return null
+  }
+}
+
+/** Друзья игрока в хабе. Пустой список - запуск не из хаба или хаб недоступен. */
+export async function hubFriends(userId: number): Promise<HubPerson[]> {
+  const token = launchTokenOf(userId)
+  if (!token) return []
+  const r = (await hubCall('/api/sdk/friends', token)) as { ok: boolean; friends: HubPerson[] } | null
+  return r?.ok ? r.friends : []
+}
+
+/** Позвать друзей из хаба в эту игру. Возвращает, скольким сообщение ушло. */
+export async function inviteHubFriends(userId: number, friendIds: number[], note?: string): Promise<number> {
+  const token = launchTokenOf(userId)
+  if (!token || friendIds.length === 0) return 0
+  const r = (await hubCall('/api/sdk/invite', token, { friendIds, note })) as { ok: boolean; sent: number } | null
+  return r?.ok ? r.sent : 0
+}

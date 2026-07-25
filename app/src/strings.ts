@@ -1,5 +1,16 @@
 // English translations keyed by the exact Russian source string.
 export const EN: Record<string, string> = {
+  'Багрянец': 'Crimson',
+  'Лазурь': 'Azure',
+  'Изумруд': 'Emerald',
+  'Золото': 'Gold',
+  'Аметист': 'Amethyst',
+  'Сталь': 'Steel',
+  // Приглашение друзей из хаба (screens/HubInvite.tsx)
+  'Позвать друзей из хаба': 'Invite friends from the hub',
+  'Позвать': 'Invite',
+  'Позвали': 'Invited',
+  'Позвать всех': 'Invite everyone',
   // App / brand
   'Легион': 'Legion',
   'Разворачиваем карту…': 'Unfurling the map…',

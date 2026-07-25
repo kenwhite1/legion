@@ -8,10 +8,10 @@ import { playerColor } from '../brand'
 import { haptic } from '../telegram'
 import { t } from '../i18n'
 
-const PHASES = [
-  { key: 'reinforce', label: 'Подкрепление', ic: '🛡️' },
-  { key: 'attack', label: 'Наступление', ic: '⚔️' },
-  { key: 'fortify', label: 'Манёвр', ic: '🏇' },
+const PHASES = () => [
+  { key: 'reinforce', label: t('Подкрепление'), ic: '🛡️' },
+  { key: 'attack', label: t('Наступление'), ic: '⚔️' },
+  { key: 'fortify', label: t('Манёвр'), ic: '🏇' },
 ] as const
 
 // пылинки в тёплом свете над картой (детерминированные позиции)
@@ -90,7 +90,7 @@ export function Board() {
     setSel(null)
   }
 
-  const phaseIdx = PHASES.findIndex(p => p.key === phase)
+  const phaseIdx = PHASES().findIndex(p => p.key === phase)
 
   return (
     <div className="board">
@@ -129,7 +129,7 @@ export function Board() {
       </div>
 
       <div className="phasebar">
-        {PHASES.map((p, i) => (
+        {PHASES().map((p, i) => (
           <div key={p.key} className={`phase-step${p.key === phase ? ' on' : ''}${i < phaseIdx ? ' done' : ''}`}>
             <span className="ic">{p.ic}</span>
             <span>{t(p.label)}</span>

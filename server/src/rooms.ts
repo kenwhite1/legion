@@ -19,7 +19,7 @@ import { botDecide, type Difficulty } from '../../shared/bots'
 import { toView } from '../../shared/view'
 import type { RoomStateDto, RoomDto } from '../../shared/types'
 import { recordResult } from './profiles'
-import { reportMatch } from './gg'
+import { reportMatch, userLang } from './gg'
 import type { MatchMode } from '../../shared/gg'
 
 interface Seat {
@@ -54,10 +54,12 @@ const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // без легко пут�
 const QUICK_DELAY = 6000 // окно подбора до автостарта быстрой партии
 
 const BOT_NAMES = ['Аскольд', 'Борислав', 'Всеволод', 'Гордей', 'Драгомир', 'Ждан']
+const BOT_NAMES_EN = ['Alaric', 'Bors', 'Wulfric', 'Gordian', 'Dragomir', 'Wystan']
 const HUMAN_NAMES = [
   'Максим', 'Лена', 'Дима', 'Соня', 'Костя', 'Вера', 'Паша', 'Юля',
   'Олег', 'Катя', 'Рома', 'Настя', 'Игорь', 'Маша', 'Артём', 'Поля',
 ]
+const HUMAN_NAMES_EN = ['Max', 'Ellie', 'Dylan', 'Sophie', 'Chris', 'Vera', 'Paul', 'Julia', 'Owen', 'Katie', 'Roman', 'Stacy', 'Isaac', 'Mia', 'Arthur', 'Polly']
 
 function newCode(): string {
   let code = ''
@@ -81,7 +83,12 @@ function pickQuickDiff(): Difficulty {
 // сложность, чтобы соперники читались как живые; в дружеских - по выбору хозяина.
 function fillBots(room: Room): void {
   const used = new Set(room.seats.map(s => s.name))
-  const pool = room.quick ? HUMAN_NAMES : BOT_NAMES
+  // Соперники представляются на языке игрока: имя выбирается здесь, на
+  // сервере, потому что клиенту botness не раскрывается (в быстрых комнатах
+  // боты маскируются под людей), а живых игроков переименовывать нельзя.
+  const pool = userLang(room.hostTgId) === 'en'
+    ? (room.quick ? HUMAN_NAMES_EN : BOT_NAMES_EN)
+    : (room.quick ? HUMAN_NAMES : BOT_NAMES)
   let b = room.seats.filter(s => s.isBot).length + 1
   let pi = Math.floor(Math.random() * pool.length)
   while (room.seats.length < room.maxPlayers) {

@@ -4,6 +4,7 @@ import { HubInvite } from './HubInvite'
 import { shareLink, haptic } from '../telegram'
 import { APP_NAME } from '../brand'
 import { t } from '../i18n'
+import { GGAvatar } from '../gg/GGAvatar'
 
 export function Lobby() {
   const room = useStore(s => s.room)
@@ -63,7 +64,7 @@ export function Lobby() {
         <div className="seatlist">
           {room.room.players.map(p => (
             <div className="seat" key={p.id}>
-              <div className="av">🎖️</div>
+              <div className="av"><GGAvatar id={p.id} fallback={<>🎖️</>} /></div>
               <div className="nm">{t(p.name)}</div>
               <div className="tag wait">{t('в строю')}</div>
             </div>
@@ -101,7 +102,7 @@ export function Lobby() {
       <div className="seatlist">
         {room.room.players.map(p => (
           <div className="seat" key={p.id}>
-            <div className="av">{p.isBot ? '🤖' : '🎖️'}</div>
+            <div className="av"><GGAvatar id={p.id} fallback={<>{p.isBot ? '🤖' : '🎖️'}</>} /></div>
             <div className="nm">{t(p.name)}</div>
             {p.isHost ? <div className="tag host">{t('ХОЗЯИН')}</div> : p.isBot ? <div className="tag bot">{t('БОТ')}</div> : <div className="tag wait">{t('готов')}</div>}
           </div>

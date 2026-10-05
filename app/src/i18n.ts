@@ -1,4 +1,4 @@
-import { resolveGameLanguage } from './gameLocale'
+import { resolveGameLanguage, installGameLanguagePicker } from './gameLocale'
 import { useSyncExternalStore } from 'react'
 import { EN } from './strings'
 export type Lang = 'ru' | 'en'
@@ -6,7 +6,7 @@ const KEY = 'gg_lang'
 let currentLang: Lang = 'ru'
 const listeners = new Set<() => void>()
 export function detectLang(): Lang { return resolveGameLanguage(KEY) }
-export function initLang(): void { currentLang = detectLang() }
+export function initLang(): void { currentLang = detectLang(); installGameLanguagePicker({ get: getLang, set: setLang, subscribe: onLangChange }) }
 export function getLang(): Lang { return currentLang }
 export function setLang(l: Lang): void {
   if (l === currentLang) return

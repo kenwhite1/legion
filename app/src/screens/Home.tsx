@@ -11,6 +11,7 @@ export function Home() {
 
   return (
     <div className="home rise">
+      <div data-gg-pregame />
       <div className="brand">
         <Logo />
         <div className="brand-name">{t(APP_NAME)}</div>
@@ -77,14 +78,8 @@ export function Home() {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4, fontWeight: 800, color: 'var(--ink-soft)' }}>
           <span>{t('Язык')}:</span>
-          <button
-            onClick={() => setLang('ru')}
-            style={{ padding: '4px 12px', borderRadius: 999, border: 'none', cursor: 'pointer', fontWeight: 800, background: getLang() === 'ru' ? 'var(--brown-deep, #7a5a2a)' : 'rgba(0,0,0,.08)', color: getLang() === 'ru' ? '#fff' : 'inherit' }}
-          >RU</button>
-          <button
-            onClick={() => setLang('en')}
-            style={{ padding: '4px 12px', borderRadius: 999, border: 'none', cursor: 'pointer', fontWeight: 800, background: getLang() === 'en' ? 'var(--brown-deep, #7a5a2a)' : 'rgba(0,0,0,.08)', color: getLang() === 'en' ? '#fff' : 'inherit' }}
-          >EN</button>
+          {null}
+          {null}
         </div>
       </div>
     </div>

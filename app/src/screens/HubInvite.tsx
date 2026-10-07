@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { t } from '../i18n'
+import { GGAvatar } from '../gg/GGAvatar'
 
 interface HubFriend { id: number; name: string; color: string; face: string }
 
@@ -34,7 +35,7 @@ export function HubInvite({ note }: { note?: string }) {
         <div className="hub-invite-list">
           {friends.map(f => (
             <div className="hub-invite-row" key={f.id}>
-              <span className="hub-invite-av" style={{ background: f.color }} />
+              <span className="hub-invite-av" style={{ background: f.color, overflow: 'hidden' }}><GGAvatar id={f.id} /></span>
               <span className="hub-invite-nm">{f.name}</span>
               <button
                 className="hub-invite-btn"

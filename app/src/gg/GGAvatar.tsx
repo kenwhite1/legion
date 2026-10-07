@@ -79,8 +79,8 @@ function schedule(refresh = false): void {
     const batch = [...queue]
     queue = new Set()
     if (!batch.length || !hub) return
+    // Без токена запуска - публичная ручка по Telegram id (shared/avatar.ts).
     const token = ggLaunchToken()
-    if (!token) { for (const uid of batch) settle(uid, undefined, refresh); notify(); return }
     void ggLooks(hub, token, batch).then(got => {
       for (const uid of batch) settle(uid, got[uid], refresh)
       notify()

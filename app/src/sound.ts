@@ -1,10 +1,16 @@
+import { initGameVolume, getGameVolume, setGameVolume, subscribeGameVolume, gameAudioOutput, installGameVolume } from './gameVolume'
 // Крошечные синтезированные звуки через WebAudio: без файлов, работает офлайн.
 // Создаётся лениво при первом воспроизведении (webview Telegram требует жеста).
 let ctx: AudioContext | null = null
 let muted = localStorage.getItem('lgMuted') === '1'
+initGameVolume(muted ? 0 : 1)
+muted = getGameVolume() === 0
+subscribeGameVolume(v => { muted = v === 0 })
+installGameVolume()
 
 export function isSoundOn(): boolean { return !muted }
 export function setSoundOn(on: boolean): void {
+  setGameVolume(on ? getGameVolume() || 1 : 0)
   muted = !on
   localStorage.setItem('lgMuted', muted ? '1' : '0')
 }
@@ -27,7 +33,7 @@ function blip(c: AudioContext, freq: number, at: number, dur: number, type: Osci
   g.gain.setValueAtTime(0.0001, at)
   g.gain.exponentialRampToValueAtTime(peak, at + 0.012)
   g.gain.exponentialRampToValueAtTime(0.0001, at + dur)
-  o.connect(g); g.connect(c.destination)
+  o.connect(g); g.connect(gameAudioOutput(c))
   o.start(at); o.stop(at + dur + 0.02)
 }
 
@@ -45,7 +51,7 @@ function noise(c: AudioContext, at: number, dur = 0.13, peak = 0.06, hp = 1400):
   const f = c.createBiquadFilter()
   f.type = 'highpass'
   f.frequency.value = hp
-  src.connect(f); f.connect(g); g.connect(c.destination)
+  src.connect(f); f.connect(g); g.connect(gameAudioOutput(c))
   src.start(at); src.stop(at + dur)
 }
 
